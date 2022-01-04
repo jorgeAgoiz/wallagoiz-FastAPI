@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from random import randrange
 from typing import Optional
 from pydantic import BaseModel
@@ -23,12 +23,13 @@ async def get_users():
 
 
 @app.get('/users/{id}')
-async def get_user_with(id: int):
+async def get_user_with(id: int, response: Response):
     for user in users:
         print(user)
         if user['id'] == id:
             return {'Your user': user}
         else:
+            response.status_code = 404
             return {'message': 'User not found'}
 
 
