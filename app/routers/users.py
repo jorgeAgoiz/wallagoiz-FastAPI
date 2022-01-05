@@ -2,6 +2,8 @@ from fastapi import APIRouter, Response, status
 from random import randrange
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
+from models.user import userDB
+from config.db import conn
 
 user = APIRouter()
 
@@ -11,7 +13,7 @@ class User(BaseModel):
     password: str
 
 
-# Variable to test my firsts endpoints
+# Variable to test my firsts endpoints without DataBase
 users = [{"id": 1, "email": "probando@gmail.com", "password": "loquesea"},
          {"id": 2, "email": "otraprueba@gmail.com",
              "password": "loqueseaversiondos"},
@@ -25,9 +27,10 @@ def find_index_user(id):
             return i
 
 
+# With connection to DB.wallagoiz
 @user.get('/users')
 async def get_users():
-    return users
+    return conn.execute(userDB.select()).fetchall()
 
 
 @user.get('/users/{id}')
