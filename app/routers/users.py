@@ -1,4 +1,6 @@
-from sqlalchemy.sql.expression import null
+from models.user import UserDB
+from models.user import CreatedUser
+from models.user import CreateUser
 from config.db import engine, SessionLocal
 from typing import List
 from fastapi import APIRouter, Response, status
@@ -22,7 +24,7 @@ def get_db():
         db.close()
 
 
-# With connection to DB.wallagoiz
+# Get All Users
 @user.get('/users')
 async def get_users(response: Response, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users: List = get_all_users(db, skip=skip, limit=limit)
@@ -31,25 +33,31 @@ async def get_users(response: Response, skip: int = 0, limit: int = 100, db: Ses
         return {'message': 'Users not found'}
     return users
 
+# Get specified user by ID
+
 
 @user.get('/users/{id}')
 async def get_user_with(id: int, response: Response, db: Session = Depends(get_db)):
-    user = get_user_by_id(db, id)
+    user: User = get_user_by_id(db, id)
     if user == None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {'message': 'User not found'}
     else:
         return user
 
-# @user.post('/users', status_code=status.HTTP_201_CREATED)
-# async def create_user(user: User):
+# Create user
 
-#     user_new = user.dict()
-#     result = conn.execute(userDB.insert().values(user_new))
+# Ahora mismo funciona sin aislar en una función separada
 
-#     new_user = conn.execute(userDB.select().where(
-#         userDB.c.id == result.lastrowid)).first()
-#     return {'New user': new_user}
+
+@user.post('/users')
+async def create_user(user: CreateUser, db: Session = Depends(get_db)):
+    new_user = UserDB(email=user.email, password=user.password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    print(new_user)
+    return new_user
 
 
 # @user.delete('/users/{id}')
