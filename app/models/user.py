@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -10,7 +11,7 @@ class User(BaseModel):  # User Schema
     id: int
     email: str
     password: str
-    created_at: str
+    created_at: datetime
 
     class Config:
         orm_mode = True
@@ -30,7 +31,7 @@ class UserDB(Base):  # Table user in MariaDB
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, nullable=False)
-    email = Column(String(100), nullable=False)
+    email = Column(String(100), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))

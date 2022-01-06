@@ -1,3 +1,4 @@
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED
 from models.user import UserDB
 from models.user import CreatedUser
 from models.user import CreateUser
@@ -9,7 +10,7 @@ from fastapi.params import Depends
 from sqlalchemy.orm.session import Session
 from models.user import User
 from models import user
-from utils.user import get_all_users, get_user_by_id
+from utils.user import get_all_users, get_user_by_id, create_new_user
 
 user.Base.metadata.create_all(bind=engine)
 
@@ -25,39 +26,34 @@ def get_db():
 
 
 # Get All Users
-@user.get('/users')
-async def get_users(response: Response, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+@user.get('/users', response_model=List[User], status_code=HTTP_200_OK)
+def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users: List = get_all_users(db, skip=skip, limit=limit)
     if len(users) == 0:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {'message': 'Users not found'}
+        raise HTTPException(status_code=404, detail="Does not exists users.")
     return users
 
 # Get specified user by ID
 
 
-@user.get('/users/{id}')
-async def get_user_with(id: int, response: Response, db: Session = Depends(get_db)):
+@user.get('/users/{id}', response_model=User, status_code=HTTP_200_OK)
+def get_user_with(id: int, db: Session = Depends(get_db)):
     user: User = get_user_by_id(db, id)
     if user == None:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {'message': 'User not found'}
+        raise HTTPException(status_code=404, detail="User not found.")
     else:
         return user
 
 # Create user
 
-# Ahora mismo funciona sin aislar en una función separada
+# Necesario controlar el manejo de errores
 
 
-@user.post('/users')
-async def create_user(user: CreateUser, db: Session = Depends(get_db)):
-    new_user = UserDB(email=user.email, password=user.password)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    print(new_user)
-    return new_user
+@user.post('/users', response_model=User, status_code=HTTP_201_CREATED)
+def create_user(user: CreateUser, db: Session = Depends(get_db)):
+    result = create_new_user(user, db)
+
+    return result
 
 
 # @user.delete('/users/{id}')

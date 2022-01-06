@@ -14,10 +14,10 @@ def get_all_users(db: Session, skip: int, limit: int):
 def get_user_by_id(db: Session, id: int):
     return db.query(UserDB).filter_by(id=id).first()
 
-# Imposible hacerla funcionar RecursionError: maximum recursion depth exceeded
-# def create_user(user: CreateUser, db: Session):
-#     new_user = UserDB(email=user.email, password=user.password)
-#     db.add(new_user)
-#     db.commit()
-#     db.refresh(new_user)
-#     return new_user
+
+def create_new_user(user: CreateUser, db: Session):
+    new_user = UserDB(email=user.email, password=user.password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
