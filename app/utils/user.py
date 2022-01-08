@@ -1,6 +1,6 @@
 from fastapi.params import Depends
+import pydantic
 from sqlalchemy.orm.session import Session
-from models.user import CreatedUser
 from models.user import CreateUser
 from models.user import UserDB
 
@@ -16,7 +16,7 @@ def get_user_by_id(db: Session, id: int):
 
 
 def create_new_user(user: CreateUser, db: Session):
-    new_user = UserDB(email=user.email, password=user.password)
+    new_user = UserDB(**user.dict())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

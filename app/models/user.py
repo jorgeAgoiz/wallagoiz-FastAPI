@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -7,24 +7,20 @@ from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String
 
 
-class User(BaseModel):  # User Schema
-    id: int
+class CreateUser(BaseModel):  # Usuario para crear
+    id: Optional[int]
     email: str
     password: str
-    created_at: datetime
+    name: str
+    lastName: str
+    location: str
+    birthday: Optional[str]
+    gender: Optional[str]
+    profilePic: Optional[str]
+    created_at: Optional[date]
 
     class Config:
         orm_mode = True
-
-
-class CreateUser(BaseModel):
-    email: str
-    password: str
-
-
-class CreatedUser(CreateUser):
-    id: Optional[int]
-    created_at: Optional[str]
 
 
 class UserDB(Base):  # Table user in MariaDB
@@ -33,5 +29,11 @@ class UserDB(Base):  # Table user in MariaDB
     id = Column(Integer, primary_key=True, nullable=False)
     email = Column(String(100), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False)
+    lastName = Column(String(255), nullable=False)
+    location = Column(String(100), nullable=False)
+    birthday = Column(String(100), nullable=True)
+    gender = Column(String(50), nullable=True)
+    profilePic = Column(String(1200), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
