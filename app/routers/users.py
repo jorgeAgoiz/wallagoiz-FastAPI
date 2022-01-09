@@ -1,7 +1,7 @@
 from datetime import timedelta
-from pydantic.main import BaseModel
 import sqlalchemy
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE
+from models.token import Token
 from utils.user import create_access_token
 from utils.user import sign_in_user
 from models.user import UserSignIn
@@ -14,10 +14,9 @@ from fastapi.params import Depends
 from sqlalchemy.orm.session import Session
 from models import user
 from utils.user import get_all_users, get_user_by_id, create_new_user
-from jose import JWTError, jwt
 import os
 from dotenv import load_dotenv
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+#from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 
 load_dotenv()  # Variables de entorno para JWT
@@ -71,17 +70,14 @@ def sign_up(user: CreateUser, db: Session = Depends(get_db)):
             status_code=HTTP_406_NOT_ACCEPTABLE, detail="Email is bussy.")
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
 @user.post("/signin", status_code=HTTP_200_OK, response_model=Token)
 def sign_in(user: UserSignIn, db: Session = Depends(get_db)):
     user_authenticated = sign_in_user(user, db)
     if not user_authenticated:
         raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect email or password.")
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password.",
+            headers={"WWW-Authenticate": "Bearer"})
     access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
