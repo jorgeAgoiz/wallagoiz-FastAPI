@@ -1,9 +1,10 @@
 from datetime import timedelta
 import sqlalchemy
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE
+from utils.user import verify_access_token
+from utils.user import authenticate_user
 from models.token import Token
-from utils.user import create_access_token
-from utils.user import sign_in_user
+from utils.oauth2 import create_access_token
 from models.user import UserSignIn
 from models.user import CreateUser
 from config.db import engine, SessionLocal
@@ -16,7 +17,6 @@ from models import user
 from utils.user import get_all_users, get_user_by_id, create_new_user
 import os
 from dotenv import load_dotenv
-#from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 
 load_dotenv()  # Variables de entorno para JWT
@@ -36,32 +36,32 @@ def get_db():
 
 
 # Get All Users
-@user.get('/users', response_model=List[CreateUser], status_code=HTTP_200_OK)
-def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users: List[CreateUser] = get_all_users(db, skip=skip, limit=limit)
-    if len(users) == 0:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
-                            detail="Does not exists users.")
-    return users
+# @user.get('/users', response_model=List[CreateUser], status_code=HTTP_200_OK)
+# def get_users(db: Session = Depends(get_db), user_email: str = Depends(get_current_user)):
+
+#     users: List[CreateUser] = get_all_users()
+#     if len(users) == 0:
+#         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+#                             detail="Does not exists users.")
+#     return users
 
 # Get specified user by ID
 
 
-@user.get('/users/{id}', response_model=CreateUser, status_code=HTTP_200_OK)
-def get_user_with(id: int, db: Session = Depends(get_db)):
-    user: CreateUser = get_user_by_id(db, id)
-    if user == None:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
-                            detail="User not found.")
-    else:
-        return user
+# @user.get('/users/{id}', response_model=CreateUser, status_code=HTTP_200_OK)
+# def get_user_with(id: int, db: Session = Depends(get_db)):
+#     user: CreateUser = get_user_by_id(db, id)
+#     if user == None:
+#         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+#                             detail="User not found.")
+#     else:
+#         return user
 
 # Create user
 
 
 @user.post('/signup', response_model=CreateUser, status_code=HTTP_201_CREATED)
 def sign_up(user: CreateUser, db: Session = Depends(get_db)):
-    # Aqui vamos a implementar los JWT  y Hash en el password
     try:
         result: CreateUser = create_new_user(user, db)
         return result
@@ -72,7 +72,7 @@ def sign_up(user: CreateUser, db: Session = Depends(get_db)):
 
 @user.post("/signin", status_code=HTTP_200_OK, response_model=Token)
 def sign_in(user: UserSignIn, db: Session = Depends(get_db)):
-    user_authenticated = sign_in_user(user, db)
+    user_authenticated: CreateUser = authenticate_user(user, db)
     if not user_authenticated:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED,
@@ -80,7 +80,17 @@ def sign_in(user: UserSignIn, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"})
     access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
+        data={"user_id": user_authenticated.id}, expires_delta=access_token_expires
+    )  # Se crea un token con el ID del usuario
     return {"access_token": access_token, "token_type": "bearer"}
 # De momento funciona pero hay que darle una vuelta
+
+
+@user.post("/probando")
+def pruebecita(token: str):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    return verify_access_token(token, credentials_exception)
