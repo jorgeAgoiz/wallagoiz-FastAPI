@@ -11,9 +11,6 @@ class UserSignIn(BaseModel):
     email: str
     password: str
 
-    # class Config:
-    #   orm_mode = True
-
 
 class CreateUser(BaseModel):  # Usuario para crear
     id: Optional[int]

@@ -1,9 +1,9 @@
-from typing import Optional
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from pydantic.main import BaseModel
 from sqlalchemy.orm.session import Session
 from starlette import status
+from models.token import TokenData, oauth2_scheme
 from utils.hash_password import verify_password
 from utils.hash_password import get_password_hash
 from models.user import UserSignIn
@@ -12,24 +12,16 @@ from models.user import UserDB
 from jose import JWTError, jwt
 import os
 from dotenv import load_dotenv
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 
 load_dotenv()  # Variables de entorno para JWT
 SECRET_KEY = os.environ.get("SECRET_KEY")
 ALGORITHM = os.environ.get("ALGORITHM")
 
-
-class TokenData(BaseModel):
-    id: Optional[int] = None
-
 # User Functions
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-def get_all_users(db: Session, skip: int, limit: int):
+def get_all_users(db: Session):
     return db.query(UserDB).all()
     # Funcion dame todos los usuarios
 
@@ -61,25 +53,22 @@ def authenticate_user(user_to_auth: UserSignIn, db: Session):
 
 
 def verify_access_token(token: str, credentials_exception):
-    payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-    id: int = payload.get("user_id")
-    print(id)
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        id: int = payload.get("user_id")
+        if id is None:
+            raise credentials_exception
+        token_data = TokenData(id=id)
+    except JWTError as err:
+        raise credentials_exception
 
-# def get_current_user(db: Session, token: str = Depends(oauth2_scheme)):
-#     credentials_exception = HTTPException(
-#         status_code=status.HTTP_401_UNAUTHORIZED,
-#         detail="Could not validate credentials",
-#         headers={"WWW-Authenticate": "Bearer"},
-#     )
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#         email: str = payload.get("user_email")
-#         if email is None:
-#             raise credentials_exception
-#         token_data = TokenData(email=email)
-#     except JWTError:
-#         raise credentials_exception
-#     user = db.query(UserDB).filter_by(email=token_data.email).first()
-#     if user is None:
-#         raise credentials_exception
-#     return token_data
+    return token_data.id
+
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    return verify_access_token(token, credentials_exception)
