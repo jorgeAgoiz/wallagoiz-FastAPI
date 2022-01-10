@@ -1,31 +1,28 @@
-from datetime import timedelta
 import sqlalchemy
+import os
+from dotenv import load_dotenv
+from datetime import timedelta
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE
-from models.user import UserDB
 from utils.user import get_current_user
-from utils.user import verify_access_token
 from utils.user import authenticate_user
-from models.token import Token
 from utils.oauth2 import create_access_token
+from models.token import Token
 from models.user import UserSignIn
 from models.user import CreateUser
 from config.db import engine, SessionLocal
 from typing import List
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from sqlalchemy.orm.session import Session
 from models import user
 from utils.user import get_all_users, get_user_by_id, create_new_user
-import os
-from dotenv import load_dotenv
 
 
 load_dotenv()  # Variables de entorno para JWT
 ACCESS_TOKEN_EXPIRE_MINUTES = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")
 
 user.Base.metadata.create_all(bind=engine)
-
 user = APIRouter()
 
 
@@ -77,5 +74,5 @@ def sign_in(user: UserSignIn, db: Session = Depends(get_db)):
     access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = create_access_token(
         data={"user_id": user_authenticated.id}, expires_delta=access_token_expires
-    )  # Se crea un token con el ID del usuario
+    )
     return {"access_token": access_token, "token_type": "bearer"}

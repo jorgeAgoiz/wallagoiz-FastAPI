@@ -18,17 +18,13 @@ load_dotenv()  # Variables de entorno para JWT
 SECRET_KEY = os.environ.get("SECRET_KEY")
 ALGORITHM = os.environ.get("ALGORITHM")
 
-# User Functions
-
 
 def get_all_users(db: Session):
     return db.query(UserDB).all()
-    # Funcion dame todos los usuarios
 
 
 def get_user_by_id(db: Session, id: int):
     return db.query(UserDB).filter_by(id=id).first()
-    # Funcion dame un usuario específico por ID
 
 
 def create_new_user(user: CreateUser, db: Session):
@@ -37,19 +33,19 @@ def create_new_user(user: CreateUser, db: Session):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user  # Sign Up Function
+    return new_user
 
 
 def authenticate_user(user_to_auth: UserSignIn, db: Session):
     email = user_to_auth.email
     plain_password = user_to_auth.password
     user: CreateUser = db.query(UserDB).filter_by(
-        email=email).first()  # Buscamos por email al usuario
+        email=email).first()
     if not user:
         return False
     if not verify_password(plain_password, user.password):
         return False
-    return user  # Devolvemos un usuario completo de la BBDD al SignIn
+    return user
 
 
 def verify_access_token(token: str, credentials_exception):
