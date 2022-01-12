@@ -10,3 +10,11 @@ def create_new_article(user_id: int, article: Article, db: Session):
     db.commit()
     db.refresh(new_article)
     return new_article
+
+
+def get_articles(db: Session):
+    return db.query(ArticleDB).all()
+
+
+def get_article(id: int, db: Session):
+    return db.query(ArticleDB).filter_by(id=id).first()
