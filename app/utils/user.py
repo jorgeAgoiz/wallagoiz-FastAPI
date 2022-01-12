@@ -1,6 +1,5 @@
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
-from pydantic.main import BaseModel
 from sqlalchemy.orm.session import Session
 from starlette import status
 from models.token import TokenData, oauth2_scheme

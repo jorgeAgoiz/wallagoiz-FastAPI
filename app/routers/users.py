@@ -23,6 +23,7 @@ load_dotenv()  # Variables de entorno para JWT
 ACCESS_TOKEN_EXPIRE_MINUTES = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")
 
 user.Base.metadata.create_all(bind=engine)
+
 user = APIRouter()
 
 
