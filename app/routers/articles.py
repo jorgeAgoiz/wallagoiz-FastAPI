@@ -1,7 +1,9 @@
-from typing import List
+from typing import List, Optional
 from fastapi.exceptions import HTTPException
+from fastapi.param_functions import Query
 from sqlalchemy.sql.functions import user
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from utils.article import remove_article
 from utils.article import get_article
 from utils.article import get_articles
 from utils.user import get_current_user
@@ -36,7 +38,7 @@ def create_article(article: Article, db: Session = Depends(get_db), user_id: int
             status_code=HTTP_400_BAD_REQUEST, detail="Something went wrong.")
 
 
-@article.get("/article")
+@article.get("/article", response_model=Article, status_code=HTTP_200_OK)
 def get_all_articles(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
     articles: List[Article] = get_articles(db)
     if len(articles) == 0:
@@ -45,7 +47,7 @@ def get_all_articles(db: Session = Depends(get_db), user_id: int = Depends(get_c
     return articles
 
 
-@article.get("/article/{id}")
+@article.get("/article/{id}", response_model=List[Article], status_code=HTTP_200_OK)
 def get_article_by_id(id: int, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
     article: Article = get_article(id, db)
     if article == None:
@@ -54,4 +56,19 @@ def get_article_by_id(id: int, db: Session = Depends(get_db), user_id: int = Dep
     return article
 
 
-# Continuaré aqui creando las nuevas rutas, el manejo de errores y los modelos de respuesta
+@article.delete("/article/{id}", status_code=HTTP_204_NO_CONTENT)
+def delete_article(id: int, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+    article: int = remove_article(id, user_id, db)
+
+    if article == 0:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                            detail="This article does not exist.")
+
+    return
+
+
+@article.get("/article-prueba")
+def probando_queries(user_id: Optional[str] = Query(None, max_length=5)):
+    prueba = {"userID": user_id}
+    # estoy manejando las queries, implementaré mejor queries que params
+    print(prueba)

@@ -1,4 +1,6 @@
 from sqlalchemy.orm.session import Session
+from fastapi.exceptions import HTTPException
+from starlette.status import HTTP_404_NOT_FOUND
 from models.article import ArticleDB
 from models.article import Article
 
@@ -18,3 +20,10 @@ def get_articles(db: Session):
 
 def get_article(id: int, db: Session):
     return db.query(ArticleDB).filter_by(id=id).first()
+
+
+def remove_article(id: int, user_id: int, db: Session):
+    article = db.query(ArticleDB).filter_by(
+        userId=user_id, id=id).delete(synchronize_session=False)
+    db.commit()
+    return article
