@@ -64,6 +64,7 @@ def get_article_by(
         if len(articles) == 0:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                                 detail="Does not exists articles.")
+        # Quizá aquí deba modificar esto para llamar todos los articulos de otro usuario
         return articles
 
 
@@ -86,11 +87,7 @@ def delete_article(id: int, db: Session = Depends(get_db), user_id: int = Depend
     return
 
 
-@article.patch("/article/{id}")
-def updt_article(id: int, article: UpdateArticle, db: Session = Depends(get_db)):
-    try:
-        article_updated = update_article(id, article, db)
-        pprint(article_updated.__dict__)
-        # Nos quedamos aqui planteando que devolvemos exactamente
-    except:
-        return {"message", "something went wrong.!!"}
+@article.patch("/article/{id}", response_model=Article, status_code=HTTP_200_OK)
+def updt_article(id: int, article: UpdateArticle, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+    return update_article(id, article, db)
+    # Este endpoint habra que modificarlo porque deberemos subir la imagen a un bucket
