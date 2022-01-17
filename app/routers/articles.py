@@ -1,8 +1,12 @@
+from pprint import pprint
 from typing import List, Optional
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Query
 from sqlalchemy.sql.functions import user
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from models.article import UpdateArticle
+from models.article import ArticleDB
+from utils.article import update_article
 from utils.article import get_article_by_userId, get_article_by_category, get_article_by_id, remove_article, get_articles
 from utils.user import get_current_user
 from utils.article import create_new_article
@@ -80,3 +84,13 @@ def delete_article(id: int, db: Session = Depends(get_db), user_id: int = Depend
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                             detail="This article does not exist.")
     return
+
+
+@article.patch("/article/{id}")
+def updt_article(id: int, article: UpdateArticle, db: Session = Depends(get_db)):
+    try:
+        article_updated = update_article(id, article, db)
+        pprint(article_updated.__dict__)
+        # Nos quedamos aqui planteando que devolvemos exactamente
+    except:
+        return {"message", "something went wrong.!!"}

@@ -23,6 +23,14 @@ class Article(BaseModel):
         orm_mode = True
 
 
+class UpdateArticle(BaseModel):
+    title: Optional[str]
+    description: Optional[str]
+    price: Optional[float]
+    category: Optional[str]
+    picture: Optional[str]
+
+
 class ArticleDB(Base):
     __tablename__ = 'article'
 
