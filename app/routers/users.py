@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from datetime import timedelta
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE
+from utils.user import delete_user
 from utils.user import get_current_user
 from utils.user import authenticate_user
 from utils.oauth2 import create_access_token
@@ -77,3 +78,10 @@ def sign_in(user: UserSignIn, db: Session = Depends(get_db)):
         data={"user_id": user_authenticated.id}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@user.delete("/users")
+def delete_current_user(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+    delete_user(user_id, db)
+    return {"message": "Its working right now!!"}
+    # terminar la implementacion de la funcion delete_user

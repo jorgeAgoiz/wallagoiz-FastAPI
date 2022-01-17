@@ -67,3 +67,11 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     return verify_access_token(token, credentials_exception)
+
+
+def delete_user(user_id: str, db: Session):
+    print(user_id)
+    user = db.query(UserDB).filter_by(
+        id=user_id).delete(synchronize_session=False)
+    db.commit()
+    return user
