@@ -1,7 +1,7 @@
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from sqlalchemy.orm.session import Session
-from starlette import status
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND
 from models.token import TokenData, oauth2_scheme
 from utils.hash_password import verify_password
 from utils.hash_password import get_password_hash
@@ -62,7 +62,7 @@ def verify_access_token(token: str, credentials_exception):
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
+        status_code=HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
@@ -70,8 +70,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 def delete_user(user_id: str, db: Session):
-    print(user_id)
     user = db.query(UserDB).filter_by(
         id=user_id).delete(synchronize_session=False)
+    if user == 0:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                            detail="User not found.")
     db.commit()
     return user

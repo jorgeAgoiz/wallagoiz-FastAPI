@@ -5,7 +5,6 @@ from fastapi.param_functions import Query
 from sqlalchemy.sql.functions import user
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from models.article import UpdateArticle
-from models.article import ArticleDB
 from utils.article import update_article
 from utils.article import get_article_by_userId, get_article_by_category, get_article_by_id, remove_article, get_articles
 from utils.user import get_current_user

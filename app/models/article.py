@@ -35,7 +35,8 @@ class ArticleDB(Base):
     __tablename__ = 'article'
 
     id = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
-    userId = Column(Integer, ForeignKey("user.id"), nullable=False)
+    userId = Column(Integer, ForeignKey(
+        "user.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(String(1200), nullable=False)
     price = Column(Float(6, 2), nullable=False)
@@ -44,5 +45,6 @@ class ArticleDB(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
 
-    author = relationship("UserDB", back_populates="articles")
+    author = relationship(
+        "UserDB", back_populates="articles")
     user_favs = relationship("FavsDB", back_populates="articles")

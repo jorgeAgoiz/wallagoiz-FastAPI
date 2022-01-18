@@ -44,5 +44,6 @@ class UserDB(Base):  # Table user in MariaDB
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
 
-    articles = relationship("ArticleDB", back_populates="author")
+    articles = relationship(
+        "ArticleDB", back_populates="author")
     favs = relationship("FavsDB", back_populates="users")

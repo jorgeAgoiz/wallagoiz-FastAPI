@@ -2,7 +2,7 @@ import sqlalchemy
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE, HTTP_204_NO_CONTENT
 from utils.user import delete_user
 from utils.user import get_current_user
 from utils.user import authenticate_user
@@ -80,8 +80,7 @@ def sign_in(user: UserSignIn, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@user.delete("/users")
+@user.delete("/users", status_code=HTTP_204_NO_CONTENT)
 def delete_current_user(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
     delete_user(user_id, db)
-    return {"message": "Its working right now!!"}
-    # terminar la implementacion de la funcion delete_user
+    return
