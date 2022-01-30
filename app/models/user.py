@@ -1,4 +1,5 @@
 from datetime import date
+from optparse import Option
 from typing import Optional
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
@@ -11,6 +12,15 @@ from sqlalchemy import Column, Integer, String
 class UserSignIn(BaseModel):
     email: str
     password: str
+
+
+class UpdateUser(BaseModel):
+    name: Optional[str]
+    lastName: Optional[str]
+    location: Optional[str]
+    profilePic: Optional[str]
+    birthday: Optional[str]
+    gender: Optional[str]
 
 
 class CreateUser(BaseModel):  # Usuario para crear

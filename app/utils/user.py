@@ -2,6 +2,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from sqlalchemy.orm.session import Session
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND
+from models.user import UpdateUser
 from models.token import TokenData, oauth2_scheme
 from utils.hash_password import verify_password
 from utils.hash_password import get_password_hash
@@ -77,3 +78,16 @@ def delete_user(user_id: str, db: Session):
                             detail="User not found.")
     db.commit()
     return user
+
+
+def update_user(id: int, data: UpdateUser, db: Session):
+    new_data = data.dict(exclude_unset=True, exclude_none=True)
+    user_to = db.query(UserDB).filter_by(id=id)
+
+    if user_to.first() == None:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                            detail='Article not found.')
+
+    user_to.update(new_data, synchronize_session=False)
+    db.commit()
+    return user_to.first()

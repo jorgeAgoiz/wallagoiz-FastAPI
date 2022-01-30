@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 from datetime import timedelta
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE, HTTP_204_NO_CONTENT
+from utils.user import update_user
+from models.user import UpdateUser
 from utils.user import delete_user
 from utils.user import get_current_user
 from utils.user import authenticate_user
@@ -36,11 +38,11 @@ def get_db():
         db.close()
 
 
-@user.get('/user/{id}', response_model=CreateUser, status_code=HTTP_200_OK)
+@user.get('/users/{id}', response_model=CreateUser, status_code=HTTP_200_OK)
 def get_users(id: int, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
     user: CreateUser = get_user_by_id(db, id)
-    print(user)
-    if len(user) == 0:
+    print(user_id)
+    if user == None:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                             detail="Does not exists users.")
     return user
@@ -85,3 +87,8 @@ def sign_in(user: UserSignIn, db: Session = Depends(get_db)):
 def delete_current_user(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
     delete_user(user_id, db)
     return
+
+
+@user.patch("/user", response_model=CreateUser, status_code=HTTP_200_OK)
+def updt_user(data: UpdateUser, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+    return update_user(user_id, data, db)
