@@ -2,7 +2,7 @@ from datetime import date
 from typing import Optional
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
-from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.sql.sqltypes import TIMESTAMP, Float
 from config.db import Base
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String
@@ -22,6 +22,7 @@ class CreateUser(BaseModel):  # Usuario para crear
     location: str
     birthday: Optional[str]
     gender: Optional[str]
+    rating: Optional[float]
     profilePic: Optional[str]
     created_at: Optional[date]
 
@@ -40,6 +41,7 @@ class UserDB(Base):  # Table user in MariaDB
     location = Column(String(100), nullable=False)
     birthday = Column(String(100), nullable=True)
     gender = Column(String(50), nullable=True)
+    rating = Column(Float(2, 1), nullable=False, default=0)
     profilePic = Column(String(1200), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))

@@ -36,18 +36,19 @@ def get_db():
         db.close()
 
 
-@user.get('/users', response_model=List[CreateUser], status_code=HTTP_200_OK)
-def get_users(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
-    users: List[CreateUser] = get_all_users(db)
-    if len(users) == 0:
+@user.get('/user/{id}', response_model=CreateUser, status_code=HTTP_200_OK)
+def get_users(id: int, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+    user: CreateUser = get_user_by_id(db, id)
+    print(user)
+    if len(user) == 0:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                             detail="Does not exists users.")
-    return users
+    return user
 
 
-@user.get('/users/{id}', response_model=CreateUser, status_code=HTTP_200_OK)
-def get_user_with(id: int, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
-    user: CreateUser = get_user_by_id(db, id)
+@user.get('/user', response_model=CreateUser, status_code=HTTP_200_OK)
+def get_user_with(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+    user: CreateUser = get_user_by_id(db, user_id)
     if user == None:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                             detail="User not found.")
