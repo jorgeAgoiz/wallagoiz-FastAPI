@@ -68,7 +68,7 @@ def get_article_by(
 
 
 @article.get("/articles", response_model=List[Article], status_code=HTTP_200_OK)
-def get_all_articles(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+def get_all_articles(db: Session = Depends(get_db)):
     articles: List[Article] = get_articles(db)
     if len(articles) == 0:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
