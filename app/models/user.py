@@ -1,4 +1,5 @@
 from datetime import date
+import email
 from optparse import Option
 from typing import Optional
 from sqlalchemy.orm import relationship
@@ -21,6 +22,8 @@ class UpdateUser(BaseModel):
     profilePic: Optional[str]
     birthday: Optional[str]
     gender: Optional[str]
+    email: Optional[str]
+    password: Optional[str]
 
 
 class CreateUser(BaseModel):  # Usuario para crear

@@ -1,8 +1,10 @@
+from pprint import pprint
 import sqlalchemy
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE, HTTP_204_NO_CONTENT
+from utils.user import modify_password
 from utils.user import update_user
 from models.user import UpdateUser
 from utils.user import delete_user
@@ -90,5 +92,8 @@ def delete_current_user(db: Session = Depends(get_db), user_id: int = Depends(ge
 
 
 @user.patch("/user", response_model=CreateUser, status_code=HTTP_200_OK)
-def updt_user(data: UpdateUser, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
-    return update_user(user_id, data, db)
+def updt_user(user_data: UpdateUser, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+    if user_data.password:
+        return modify_password(user_id, user_data, db)
+    else:
+        return update_user(user_id, user_data, db)

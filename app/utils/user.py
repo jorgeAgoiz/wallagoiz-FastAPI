@@ -80,13 +80,27 @@ def delete_user(user_id: str, db: Session):
     return user
 
 
-def update_user(id: int, data: UpdateUser, db: Session):
-    new_data = data.dict(exclude_unset=True, exclude_none=True)
-    user_to = db.query(UserDB).filter_by(id=id)
+def update_user(user_id: int, user_data: UpdateUser, db: Session):
+    new_data = user_data.dict(exclude_unset=True, exclude_none=True)
+    user_to = db.query(UserDB).filter_by(id=user_id)
 
     if user_to.first() == None:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
-                            detail='Article not found.')
+                            detail='User not found.')
+
+    user_to.update(new_data, synchronize_session=False)
+    db.commit()
+    return user_to.first()
+
+
+def modify_password(user_id: int, user_data: UpdateUser, db: Session):
+    user_data.password = get_password_hash(user_data.password)
+    new_data = user_data.dict(exclude_unset=True, exclude_none=True)
+    user_to = db.query(UserDB).filter_by(id=user_id)
+
+    if user_to.first() == None:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                            detail='User not found.')
 
     user_to.update(new_data, synchronize_session=False)
     db.commit()
