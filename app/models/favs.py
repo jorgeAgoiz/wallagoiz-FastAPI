@@ -7,7 +7,7 @@ from typing import Optional
 
 
 class CreateFav(BaseModel):
-    article_id: int
+    articleId: int
     userId: Optional[int]
 
     class Config:
