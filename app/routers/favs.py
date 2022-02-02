@@ -54,7 +54,7 @@ def get_favs(db: Session = Depends(get_db), user_id: int = Depends(get_current_u
 @fav.delete("/favs/{article_id}", status_code=HTTP_204_NO_CONTENT)
 def remove_fav(article_id: int, db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
     fav_removed: int = delete_fav(article_id, user_id, db)
-    print(fav_removed)
+
     if fav_removed == 0:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                             detail="This article does not exist.")
