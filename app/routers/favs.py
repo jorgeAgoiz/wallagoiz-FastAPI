@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import List
 import sqlalchemy
 import os
@@ -45,6 +46,7 @@ def create_new_favs(fav: CreateFav, db: Session = Depends(get_db), user_id: int 
 @fav.get("/favs", status_code=HTTP_200_OK)
 def get_favs(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
     favs_articles: List[Article] = get_favs_from(user_id, db)
+
     if len(favs_articles) == 0:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                             detail="Does not exists articles.")
